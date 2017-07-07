@@ -1,4 +1,83 @@
-#This part could be moved to open repo
+library(reshape2)
+setwd("~/Desktop/RAALLPET")
+
+# Read file with demographical data
+Subject_data <- read.csv("~/Desktop/RAALLPET/PET_group_gene_EVF_170323.csv", sep=";")
+Subject_data <- Subject_data[ ,c(1, 2, 4:7, 11:15)]
+names(Subject_data) <- c("Subject", "Sex", "Age", "Group", "BMI_1", "BMI_2", "PET1", "PET2", "In_season",
+                         "Out_season", "Genotype")
+
+# Rename group
+levels(Subject_data$Group)[levels(Subject_data$Group)=="Allergi"] <- "Allergy"
+levels(Subject_data$Group)[levels(Subject_data$Group)=="Kontroll-RA"] <- "Ctrl-RA"
+levels(Subject_data$Group)[levels(Subject_data$Group)=="Kontroll-allergi"] <- "Ctrl-all"
+levels(Subject_data$Group)[levels(Subject_data$Group)=="Kontroll-allergi+RA"] <- "Ctrl-all+RA"
+
+# Rename sex
+levels(Subject_data$Sex)[levels(Subject_data$Sex)=="Kvinna"] <- "Female"
+levels(Subject_data$Sex)[levels(Subject_data$Sex)=="Man"] <- "Male"
+
+
+
+# Add variables for which ones to use etc. Calculate demographics or divide in age categories. Maybe some more should be added in file
+
+# Convert to long format and reorder
+Subject_data_long <- melt(Subject_data, id.vars = c("Subject", "Sex", 
+                                                    "Age", "Group","BMI_1", "BMI_2",
+                                                    "PET1", "PET2", "Genotype"))
+
+Subject_data_long <- Subject_data_long[ order(Subject_data_long$Subject, Subject_data_long$variable), ]
+
+# Generate data frame for allergy only
+Subject_data_long_allergy <- subset(Subject_data_long, Group == "Allergy" | Group == "Ctrl-all" 
+                                    | Group == "Ctrl-all+RA")
+
+# Define a new column for session (first or second PET), based on 2 previous columns
+Subject_data_long_allergy$Session <- as.Date(Subject_data_long_allergy$PET1) - as.Date(Subject_data_long_allergy$value)
+Subject_data_long_allergy$Session[Subject_data_long_allergy$Session == 0] <- 1
+Subject_data_long_allergy$Session[Subject_data_long_allergy$Session < 0] <- 2
+Subject_data_long_allergy$Session <- as.factor(Subject_data_long_allergy$Session)
+
+
+# Rename columns
+names(Subject_data_long_allergy)[names(Subject_data_long_allergy) == 'value'] <- 'Date'
+names(Subject_data_long_allergy)[names(Subject_data_long_allergy) == 'variable'] <- 'Pollen_status'
+
+# Remove observations from subject 19, session 2 (no PET), 
+Subject_data_long_allergy <- subset(Subject_data_long_allergy, (!is.na(Subject_data_long_allergy$Session)))
+
+# Subject 69, 2:nd sessions (no PET) and subject 78, 2:nd sessions (no PET) are kept for other data
+
+# Combine 2 groups of controls
+Subject_data_long_allergy$Group[Subject_data_long_allergy$Group == "Ctrl-all+RA"] <- "Ctrl-all"
+
+# Drop unused levels
+Subject_data_long_allergy$Group <- droplevels(Subject_data_long_allergy$Group)
+Subject_data_long_allergy$Sex <- droplevels(Subject_data_long_allergy$Sex)
+
+# Rename groups
+levels(Subject_data_long_allergy$Group)[levels(Subject_data_long_allergy$Group)=="Ctrl-all"] <- "Control"
+
+# Date in correct format
+Subject_data_long_allergy$PET.date <- as.Date(Subject_data_long_allergy$Date)
+
+# Mean BMI for those with 2 values
+Subject_data_long_allergy$MeanBMI <- (Subject_data_long_allergy$BMI_1 + Subject_data_long_allergy$BMI_2)/2
+
+Subject_list_allergy <- Subject_data_long_allergy[ ,c(1:4, 9, 10, 12:14)]
+
+# Rename pollen status
+levels(Subject_list_allergy$Pollen_status)[levels(Subject_list_allergy$Pollen_status)=="In_season"] <- "IN"
+levels(Subject_list_allergy$Pollen_status)[levels(Subject_list_allergy$Pollen_status)=="Out_season"] <- "OUT"
+# Pseudomise data if released
+
+save(Subject_list_allergy, file = "Demographics_allergy.RData")
+save(Subject_data, file = "Demographics_all.RData")
+
+rm(list = ls())
+
+
+#This part is also presented in the open repo
 require(Gmisc)
 require(gdata)
 require(ggplot2)
@@ -330,74 +409,6 @@ lme_RA_PET <- lme(Reduced_Activity ~ GM + Group*Pollen_status, data = Data_MFI_P
 anova(lme_RA_PET, type = "marginal")
 intervals(lme_RA_PET, which = "fixed")
 
-# Test associations between cytokines and general fatigue
-load("Data_cytokines_allergy.RData")
-
-Data_MFI_cytokines <- merge(MFI, data_cytokines, by.x = c("Subject", "Pollen_season"), 
-                            by.y = c("Sample.ID", "Season"))
-
-Data_MFI_cytokines$Group <- droplevels(Data_MFI_cytokines$Group)
-Data_MFI_cytokines$Pollen_season <- droplevels(Data_MFI_cytokines$Pollen_season)
-
-# TNF
-ggplot(Data_MFI_cytokines, aes(x= TNF_concentration, y= General_Fatigue, color=Group, shape=Group)) +
-  geom_point(size= 3) +
-  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)+
-  ggtitle("TNF vs General fatigue")
-
-lme_GF_TNF <- lme(General_Fatigue ~ TNF_concentration + Group*Pollen_season, data = Data_MFI_cytokines,
-                  random = ~ 1|Subject, na.action = na.exclude)
-
-anova(lme_GF_TNF, type = "marginal")
-intervals(lme_GF_TNF)
-
-# IL-6
-ggplot(Data_MFI_cytokines, aes(x= IL6_log_concentration, y= General_Fatigue, color=Group, shape=Group)) +
-  geom_point(size= 3) +
-  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)+
-  ggtitle("IL-6 vs General fatigue")
-
-lme_GF_IL6 <- lme(General_Fatigue ~ IL6_log_concentration + Group*Pollen_season, data = Data_MFI_cytokines,
-                  random = ~ 1|Subject, na.action = na.exclude)
-
-anova(lme_GF_IL6, type = "marginal")
-intervals(lme_GF_IL6)
-
-# IL-5
-ggplot(Data_MFI_cytokines, aes(x= IL5_log_concentration, y= General_Fatigue, color=Group, shape=Group)) +
-  geom_point(size= 3) +
-  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)+
-  ggtitle("IL-5 vs General fatigue")
-
-lme_GF_IL5 <- lme(General_Fatigue ~ IL5_log_concentration + Group*Pollen_season, data = Data_MFI_cytokines,
-                  random = ~ 1|Subject, na.action = na.exclude)
-
-anova(lme_GF_IL5, type = "marginal")
-intervals(lme_GF_IL5)
-
-# IFN
-ggplot(Data_MFI_cytokines, aes(x= IFN_log_concentration, y= General_Fatigue, color=Group, shape=Group)) +
-  geom_point(size= 3) +
-  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)+
-  ggtitle("IL-5 vs General fatigue")
-
-lme_GF_IFN <- lme(General_Fatigue ~ IFN_log_concentration + Group*Pollen_season, data = Data_MFI_cytokines,
-                  random = ~ 1|Subject, na.action = na.exclude)
-
-anova(lme_GF_IFN, type = "marginal")
-intervals(lme_GF_IFN)
-
-# IL-8
-ggplot(Data_MFI_cytokines, aes(x= IL8_log_concentration, y= General_Fatigue, color=Group, shape=Group)) +
-  geom_point(size= 3) +
-  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)+
-  ggtitle("IL-5 vs General fatigue")
-
-lme_GF_IL8 <- lme(General_Fatigue ~ IL8_log_concentration + Group*Pollen_season, data = Data_MFI_cytokines,
-                  random = ~ 1|Subject, na.action = na.exclude)
-
-anova(lme_GF_IL8, type = "marginal")
-intervals(lme_GF_IL8)
 
 
 # Test relation between sleep and fatigue

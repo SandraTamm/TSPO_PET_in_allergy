@@ -5,6 +5,7 @@ require(plyr)
 require(gridExtra)
 require(cowplot)
 require(readr)
+require(htmlTable)
 
 setwd("~/Desktop/RAALLPET")
 source('Utils/SummarisingFunctions.R', chdir = T)
@@ -212,6 +213,74 @@ colnames(contrasts(data_cytokines$Group)) <- levels(data_cytokines$Group)[2]
 contrasts(data_cytokines$Season) <- rbind(-.5, .5)
 colnames(contrasts(data_cytokines$Season)) <- levels(data_cytokines$Season)[2]
 
+# Combine IL-5 and IFN to look at shifts
+data_cytokines$IFN_IL5_ratio <- data_cytokines$IFN_log_concentration/data_cytokines$IL5_log_concentration
+
+
+
+# Make function to summarise effects on cytokines
+
+summariseCytokineRow <- function(measurevar) {
+  
+  f <- reformulate("Group + Season + Group*Season", measurevar)
+  model <- lme(f, data = data_cytokines,
+               random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
+  
+  estimate <- intervals(model, which = "fixed")
+  RoundEstimates <- round(estimate$fixed, digits = 2)
+  pval <- anova(model, type = "marginal")
+  
+  result <- c(paste(RoundEstimates[1,2], " (", RoundEstimates[1,1], "-",  RoundEstimates[1,3], ")",
+                    sep = ""),
+              paste(RoundEstimates[2,2], " (", RoundEstimates[2,1], "-",  RoundEstimates[2,3], ")",
+                    sep = ""),
+              paste(round(pval[2,4], digits = 3), sep = ""),
+              paste(RoundEstimates[3,2], " (", RoundEstimates[3,1], "-",  RoundEstimates[3,3], ")",
+                    sep = ""),
+              paste(round(pval[3,4], digits = 3), sep = ""),
+              paste(RoundEstimates[4,2], " (", RoundEstimates[4,1], "-",  RoundEstimates[4,3], ")",
+                    sep = ""),
+              paste(round(pval[4,4], digits = 3), sep = ""))
+  
+  return(result)
+}
+
+XTNF <- summariseCytokineRow("TNF_concentration")
+XlogIL6 <- summariseCytokineRow("IL6_log_concentration")
+XlogIL5 <- summariseCytokineRow("IL5_log_concentration")
+XlogIFN <- summariseCytokineRow("IFN_log_concentration")
+XlogIL8 <- summariseCytokineRow("IL8_log_concentration")
+XIFN_IL5_ratio <- summariseCytokineRow("IFN_IL5_ratio")
+
+
+# Function to show htmlTable in viewer.
+viewHtmlTable <- function(htmlText) {
+  tf <- tempfile(fileext = ".html")
+  writeLines(htmlText, tf)
+  getOption("viewer")(tf)
+}
+
+
+# Make table with cytokine effects
+viewHtmlTable(htmlTable(
+  x        = rbind(c("Intercept", "Group (allergic vs controls)", " ", "Season (in vs out)", 
+                     " ", "Group*season", " "),
+                   c("Estimate + CI", "Estimate + CI", "p", "Estimate + CI", 
+                     "p", "Estimate + CI", "p"),
+                   XTNF, XlogIL6, XlogIL5, 
+                   XlogIFN, XlogIL8, XIFN_IL5_ratio
+  ),
+  caption  = paste("Table 4. Cytokine"),
+  label    = "Table4",
+  rowlabel = "Variables",
+  rnames = c("Variable", " ", "TNF-", "log(IL-6)", "log(IL-5)", 
+             "log(IFN-)", "log(IL-8)", "log(IFN)/log(Il-5)"),
+  rgroup   = c("", "Cytokines"),
+  n.rgroup = c(2, 6),
+  ctable   = TRUE,
+))
+
+
 # Main effect of group and season, TNF
 summary_TNF <- summarySEwithin(data=data_cytokines, measurevar = "TNF_concentration", 
                                betweenvars="Group", withinvars="Season", idvar="Sample.ID", 
@@ -231,26 +300,26 @@ TNF_main <- ggplot(data_cytokines, aes(Season, TNF_concentration, group=Sample.I
   theme(legend.position= "none")
 
 lme_TNF <- lme(TNF_concentration ~ Group*Season, data = data_cytokines,
-               random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
+                random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
 
 anova(lme_TNF, type = "marginal")
 intervals(lme_TNF, which = "fixed")
 
 # Post hoc
 lme_TNF_all <- lme(TNF_concentration ~ Season, data = subset(data_cytokines, Group == "All"),
-                   random = ~ 1|Sample.ID, na.action = na.exclude)
+               random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_TNF_all, type = "marginal")
 intervals(lme_TNF_all)
 
 lme_TNF_ctrl <- lme(TNF_concentration ~ Season, data = subset(data_cytokines, Group == "Ctrl"),
-                    random = ~ 1|Sample.ID, na.action = na.exclude)
+                   random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_TNF_ctrl, type = "marginal")
 intervals(lme_TNF_ctrl)
 
 lme_TNF_out <- lme(TNF_concentration ~ Group, data = subset(data_cytokines, Season == "OUT"),
-                   random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
+                    random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
 
 anova(lme_TNF_out, type = "marginal")
 intervals(lme_TNF_out)
@@ -304,19 +373,19 @@ intervals(lme_IL5, which = "fixed")
 
 # Post hoc
 lme_IL5_all <- lme(IL5_log_concentration ~ Season, data = subset(data_cytokines, Group == "All"),
-                   random = ~ 1|Sample.ID, na.action = na.exclude)
+               random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_IL5_all, type = "marginal")
 intervals(lme_IL5_all)
 
 lme_IL5_ctrl <- lme(IL5_log_concentration ~ Season, data = subset(data_cytokines, Group == "Ctrl"),
-                    random = ~ 1|Sample.ID, na.action = na.exclude)
+                   random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_IL5_ctrl, type = "marginal")
 intervals(lme_IL5_ctrl)
 
 lme_IL5_out <- lme(IL5_log_concentration ~ Group, data = subset(data_cytokines, Season == "OUT"),
-                   random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
+                    random = list(~1|Sample.ID, ~1|Pair), na.action = na.exclude)
 
 anova(lme_IL5_out, type = "marginal")
 intervals(lme_IL5_out, which = "fixed")
@@ -395,7 +464,7 @@ IFN_IL5_main <- ggplot(data_cytokines, aes(Season, IFN_IL5_ratio, group=Sample.I
   ggtitle("Effect of pollen season in patients and controls on log IFN-gamma/log IL-5 ratio")
 
 lme_IFN_IL5 <- lme(IFN_IL5_ratio ~ Group*Season, data = data_cytokines,
-                   random = ~ 1|Sample.ID, na.action = na.exclude)
+               random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_IFN_IL5, type = "marginal")
 intervals(lme_IFN_IL5, which = "fixed")
@@ -404,19 +473,19 @@ multiplot(IFN_IL5_log_hist, IFN_IL5_main, cols = 2)
 
 # Post hoc
 lme_IFN_IL5_all <- lme(IFN_IL5_ratio ~ Season, data = subset(data_cytokines, Group == "All"),
-                       random = ~ 1|Sample.ID, na.action = na.exclude)
+                   random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_IFN_IL5_all, type = "marginal")
 intervals(lme_IFN_IL5_all)
 
 lme_IFN_IL5_ctrl <- lme(IFN_IL5_ratio ~ Season, data = subset(data_cytokines, Group == "Ctrl"),
-                        random = ~ 1|Sample.ID, na.action = na.exclude)
+                       random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_IFN_IL5_ctrl, type = "marginal")
 intervals(lme_IFN_IL5_ctrl)
 
 lme_IFN_IL5_out <- lme(IFN_IL5_ratio ~ Group, data = subset(data_cytokines, Season == "OUT"),
-                       random = ~ 1|Sample.ID, na.action = na.exclude)
+                        random = ~ 1|Sample.ID, na.action = na.exclude)
 
 anova(lme_IFN_IL5_out, type = "marginal")
 intervals(lme_IFN_IL5_out)
@@ -540,7 +609,7 @@ summary_season <- summarySEwithin(data=Data_93, measurevar = "GM", betweenvars="
 
 dodge = position_dodge(width=0.2)
 GM_plot <- ggplot(data = Data_93, aes(Pollen_status, GM, group=Subject, colour = factor(Group), 
-                                      ymin = 0, ymax = 7)) +
+                           ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_season, aes(Pollen_status, GM, group=Group), size = 1.2) +
@@ -587,4 +656,5 @@ ggdraw() +
   draw_plot(IFN_main, 0, 0, .5, 1/3) +
   draw_plot(IL8_main, .5, 0, .5, 1/3) +
   draw_plot_label(c("A", "B", "C", "D", "E", "F"), c(0, 0.5, 0, 0.5, 0, 0.5), c(1, 1, 2/3, 2/3, 1/3, 1/3), size = 15)
+
 
