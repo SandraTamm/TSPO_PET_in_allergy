@@ -37,16 +37,37 @@ colnames(contrasts(Data_all_diaries$Pollen_status)) <- levels(Data_all_diaries$P
 SummaryKSS_rise <- summarySEwithin(Data_all_diaries, measurevar="KSS_at_risetime", 
                                    betweenvars = "Group", withinvars = "Pollen_status", na.rm = T)
 
-KSS_plot <- ggplot(SummaryKSS_rise, aes(x=Pollen_status, y=KSS_at_risetime, colour=Group)) + 
-  geom_errorbar(aes(ymin=KSS_at_risetime-ci, ymax=KSS_at_risetime+ci), width=.1) +
-  ylim(1, 9) +
-  geom_point(size = 2) +
-  scale_color_manual(name = "Group", 
-                     breaks=c("Allergy", "Control"),
-                     labels=c("Allergy", "Control"), values = c("#D55E00", "#0072B2")) +
-  theme(legend.position="none") +
+# KSS_plot <- ggplot(SummaryKSS_rise, aes(x=Pollen_status, y=KSS_at_risetime, colour=Group)) + 
+#   geom_errorbar(aes(ymin=KSS_at_risetime-ci, ymax=KSS_at_risetime+ci), width=.1) +
+#   ylim(1, 9) +
+#   geom_point(size = 2) +
+#   scale_color_manual(name = "Group", 
+#                      breaks=c("Allergy", "Control"),
+#                      labels=c("Allergy", "Control"), values = c("#D55E00", "#0072B2")) +
+#   theme(legend.position="none") +
+#   xlab("Pollen season") +
+#   ylab("Morning sleepiness (KSS)") 
+
+# Alternative plot
+Data_all_diaries$Pollen_status_n[Data_all_diaries$Pollen_status == "IN"] <- 2
+Data_all_diaries$Pollen_status_n[Data_all_diaries$Pollen_status == "OUT"] <- 1
+
+Data_all_diaries$scat_adj[Data_all_diaries$Group == "Allergy"] <- 0.20
+Data_all_diaries$scat_adj[Data_all_diaries$Group == "Control"] <- -0.20
+
+KSS_plot <- ggplot(Data_all_diaries, aes(x=Pollen_status, y=KSS_at_risetime, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 10) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("Allergy", "Control"),
+                    labels=c("Allergy", "Healthy subjects"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, KSS_at_risetime),
+              position=position_jitter(width=0.1,height=0.1),
+              alpha=0.6,
+              size=2,
+              show.legend=T) +
   xlab("Pollen season") +
-  ylab("Morning sleepiness (KSS)") 
+  ylab("Morning sleepiness")
 
 
 lme_KSS_morning <- lme(KSS_at_risetime ~ Group + Pollen_status + Group*Pollen_status, data = Data_all_diaries,
@@ -82,16 +103,31 @@ Data_all_diaries$SleepQuality <- rowMeans(Data_all_diaries[ ,18:21], na.rm = T)
 SummarySQ <- summarySEwithin(Data_all_diaries, measurevar="SleepQuality", 
                              betweenvars = "Group", withinvars = "Pollen_status", na.rm = T)
 
-SQ_plot <- ggplot(SummarySQ, aes(x=Pollen_status, y=SleepQuality, colour=Group)) + 
-  geom_errorbar(aes(ymin=SleepQuality-ci, ymax=SleepQuality+ci), width=.1) +
-  ylim(1, 5) +
-  geom_point(size = 2) +
-  scale_color_manual(name = "Group", 
-                     breaks=c("Allergy", "Control"),
-                     labels=c("Allergy", "Control"), values = c("#D55E00", "#0072B2")) +
-  theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+# SQ_plot <- ggplot(SummarySQ, aes(x=Pollen_status, y=SleepQuality, colour=Group)) + 
+#   geom_errorbar(aes(ymin=SleepQuality-ci, ymax=SleepQuality+ci), width=.1) +
+#   ylim(1, 5) +
+#   geom_point(size = 2) +
+#   scale_color_manual(name = "Group", 
+#                      breaks=c("Allergy", "Control"),
+#                      labels=c("Allergy", "Control"), values = c("#D55E00", "#0072B2")) +
+#   theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+#   xlab("Pollen season") +
+#   ylab("Rated sleep quality") 
+
+SQ_plot <- ggplot(Data_all_diaries, aes(x=Pollen_status, y=SleepQuality, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 6) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("All", "Ctrl"),
+                    labels=c("Allergy", "Control"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, SleepQuality),
+              position=position_jitter(width=0.1,height=0),
+              alpha=0.6,
+              size=2,
+              show.legend=FALSE) +
+  theme(legend.justification=c(0,0), legend.position=c(0, 0)) +
   xlab("Pollen season") +
-  ylab("Rated sleep quality") 
+  ylab("Rated sleep quality")
 
 lme_SQ <- lme(SleepQuality ~ Group + Pollen_status + Group*Pollen_status, data = Data_all_diaries,
               random = list(~1|Subject, ~1|Pair), na.action = na.exclude) 
@@ -243,6 +279,21 @@ plot_grid(KSS_plot + theme(legend.position="top"),
           hjust = -1,
           nrow = 2
 )
+
+sleep_plot <- plot_grid(
+  KSS_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  SQ_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  TST_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  Deepsleep_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  align = 'vh',
+  hjust = -1,
+  nrow = 2
+)
+
+# Add legend
+legend_b <- get_legend(KSS_plot + theme(legend.position="bottom"))
+plot_grid(sleep_plot, legend_b, ncol = 1, rel_heights = c(1, .05))
+
 
 
 # Calculate mean sleep per subject for other analyses

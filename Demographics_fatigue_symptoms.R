@@ -1,4 +1,6 @@
 library(reshape2)
+library(readr)
+library(cowplot)
 setwd("~/Desktop/RAALLPET")
 
 # Read file with demographical data
@@ -289,6 +291,100 @@ colnames(contrasts(Subject_list_allergy$Group)) <- levels(Subject_list_allergy$G
 
 contrasts(Subject_list_allergy$Pollen_status) <- rbind(-.5, .5)
 colnames(contrasts(Subject_list_allergy$Pollen_status)) <- levels(Subject_list_allergy$Pollen_status)[2]
+
+
+
+Subject_list_allergy$Pollen_status_n[Subject_list_allergy$Pollen_status == "IN"] <- 2
+Subject_list_allergy$Pollen_status_n[Subject_list_allergy$Pollen_status == "OUT"] <- 1
+
+Subject_list_allergy$scat_adj[Subject_list_allergy$Group == "Allergy"] <- 0.20
+Subject_list_allergy$scat_adj[Subject_list_allergy$Group == "Control"] <- -0.20
+
+
+GF_plot <- ggplot(Subject_list_allergy, aes(x=Pollen_status, y=General_Fatigue, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 20) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("Allergy", "Control"),
+                    labels=c("Allergy", "Healthy subjects"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, General_Fatigue),
+              position=position_jitter(width=0.1,height=0),
+              alpha=0.6,
+              size=2) +
+  xlab("Pollen season") +
+  ylab("General fatigue")
+
+PF_plot <- ggplot(Subject_list_allergy, aes(x=Pollen_status, y=Physical_Fatigue, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 20) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("All", "Ctrl"),
+                    labels=c("Allergy", "Healthy subjects"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, Physical_Fatigue),
+              position=position_jitter(width=0.1,height=0),
+              alpha=0.6,
+              size=2,
+              show.legend=FALSE) +
+  xlab("Pollen season") +
+  ylab("Physical fatigue")
+
+MF_plot <- ggplot(Subject_list_allergy, aes(x=Pollen_status, y=Mental_Fatigue, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 20) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("All", "Ctrl"),
+                    labels=c("Allergy", "Healthy subjects"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, Mental_Fatigue),
+              position=position_jitter(width=0.1,height=0),
+              alpha=0.6,
+              size=2,
+              show_guide=FALSE) +
+  xlab("Pollen season") +
+  ylab("Mental fatigue")
+
+RM_plot <- ggplot(Subject_list_allergy, aes(x=Pollen_status, y=Reduced_Motivation, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 20) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("All", "Ctrl"),
+                    labels=c("Allergy", "Healthy subjects"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, Reduced_Motivation),
+              position=position_jitter(width=0.1,height=0),
+              alpha=0.6,
+              size=2,
+              show_guide=FALSE) +
+  xlab("Pollen season") +
+  ylab("Reduced motivation")
+
+RA_plot <- ggplot(Subject_list_allergy, aes(x=Pollen_status, y=Reduced_Activity, fill = Group)) +
+  geom_boxplot(outlier.size = 0) +
+  ylim(0, 20) +
+  scale_fill_manual(name = "Group", 
+                    breaks=c("All", "Ctrl"),
+                    labels=c("Allergy", "Healthy subjects"), values = c("#D55E00", "#0072B2")) +
+  geom_jitter(aes(Pollen_status_n + scat_adj, Reduced_Activity),
+              position=position_jitter(width=0.1,height=0),
+              alpha=0.6,
+              size=2,
+              show_guide=FALSE) +
+  xlab(label = "none") +
+  ylab("Reduced activity")
+
+fatigue_plot <- plot_grid(
+  GF_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  PF_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  MF_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  RM_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  RA_plot + theme(legend.position="none", axis.title.x = element_blank()),
+  align = 'vh',
+  hjust = -1,
+  nrow = 1
+)
+
+# Add legend
+legend_b <- get_legend(GF_plot + theme(legend.position="bottom"))
+plot_grid(fatigue_plot, legend_b, ncol = 1, rel_heights = c(1, .05))
+
 
 
 summariseFatigueRow <- function(measurevar) {

@@ -14,7 +14,7 @@ load("PET_VT_63_2TCM_3exp.RData")
 # Gray matter
 
 summary_GM <- summarySEwithin(data=Data_63, measurevar = "GM", betweenvars="Group", 
-                              withinvars="Pollen_status", idvar="Subject", na.rm=FALSE)
+                                  withinvars="Pollen_status", idvar="Subject", na.rm=FALSE)
 
 dodge = position_dodge(width=0.2)
 GM_plot <- ggplot(data = Data_63, aes(Pollen_status, GM, group=Subject, colour = factor(Group), 
@@ -24,18 +24,18 @@ GM_plot <- ggplot(data = Data_63, aes(Pollen_status, GM, group=Subject, colour =
   geom_line(data = summary_GM, aes(Pollen_status, GM, group=Group), size = 1.2) +
   scale_color_manual(name = "Group", values=c("black", "red"), 
                      breaks=c("All", "Ctrl-all"),
-                     labels=c("Allergy", "Control")) +
+                     labels=c("Allergy", "Healthy subjects")) +
   theme(legend.position= "top") +
   xlab("Pollen season") +
   ylab("Grey matter") 
 
 # Lateral Frontal Cortex
 summary_LFC <- summarySEwithin(data=Data_63, measurevar = "X.LFC", betweenvars="Group", 
-                               withinvars="Pollen_status", idvar="Subject", na.rm=FALSE)
+                              withinvars="Pollen_status", idvar="Subject", na.rm=FALSE)
 
 dodge = position_dodge(width=0.2)
 LFC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.LFC, group=Subject, colour = factor(Group), 
-                                       ymin = 0, ymax = 7)) +
+                                      ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_LFC, aes(Pollen_status, X.LFC, group=Group), size = 1.2) +
@@ -170,11 +170,11 @@ SMC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.SMC, group=Subject, colo
 
 # Temporal Pole
 summary_TP <- summarySEwithin(data=Data_63, measurevar = "X.TP", betweenvars="Group", 
-                              withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 TP_plot <- ggplot(data = Data_63, aes(Pollen_status, X.TP, group=Subject, colour = factor(Group), 
-                                      ymin = 0, ymax = 7)) +
+                                       ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_TP, aes(Pollen_status, X.TP, group=Group), size = 1.2) +
@@ -187,11 +187,11 @@ TP_plot <- ggplot(data = Data_63, aes(Pollen_status, X.TP, group=Subject, colour
 
 # Lateral Parietal Cortex
 summary_LPC <- summarySEwithin(data=Data_63, measurevar = "X.LPC", betweenvars="Group", 
-                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                              withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 LPC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.LPC, group=Subject, colour = factor(Group), 
-                                       ymin = 0, ymax = 7)) +
+                                      ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_LPC, aes(Pollen_status, X.LPC, group=Group), size = 1.2) +
@@ -223,11 +223,11 @@ PCC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.PCC, group=Subject, colo
 
 # Medial Inferior Occipital Cortex
 summary_MIOC <- summarySEwithin(data=Data_63, measurevar = "X.MIOC", betweenvars="Group", 
-                                withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 MIOC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.MIOC, group=Subject, colour = factor(Group), 
-                                        ymin = 0, ymax = 7)) +
+                                       ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_MIOC, aes(Pollen_status, X.MIOC, group=Group), size = 1.2) +
@@ -241,11 +241,11 @@ MIOC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.MIOC, group=Subject, co
 
 # Lateral Occipital Cortex
 summary_LOC <- summarySEwithin(data=Data_63, measurevar = "X.LOC", betweenvars="Group", 
-                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                                withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 LOC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.LOC, group=Subject, colour = factor(Group), 
-                                       ymin = 0, ymax = 7)) +
+                                        ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_LOC, aes(Pollen_status, X.LOC, group=Group), size = 1.2) +
@@ -275,11 +275,11 @@ HIP_plot <- ggplot(data = Data_63, aes(Pollen_status, X.HIP, group=Subject, colo
 
 # Parahippocampal gyrus
 summary_PHIP <- summarySEwithin(data=Data_63, measurevar = "X.PHIP", betweenvars="Group", 
-                                withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 PHIP_plot <- ggplot(data = Data_63, aes(Pollen_status, X.PHIP, group=Subject, colour = factor(Group), 
-                                        ymin = 0, ymax = 7)) +
+                                       ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_PHIP, aes(Pollen_status, X.PHIP, group=Group), size = 1.2) +
@@ -293,11 +293,11 @@ PHIP_plot <- ggplot(data = Data_63, aes(Pollen_status, X.PHIP, group=Subject, co
 
 # Medial Cingulate Cortex
 summary_MCC <- summarySEwithin(data=Data_63, measurevar = "X.MCC", betweenvars="Group", 
-                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                                withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 MCC_plot <- ggplot(data = Data_63, aes(Pollen_status, X.MCC, group=Subject, colour = factor(Group), 
-                                       ymin = 0, ymax = 7)) +
+                                        ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_MCC, aes(Pollen_status, X.MCC, group=Group), size = 1.2) +
@@ -414,11 +414,11 @@ THA_plot <- ggplot(data = Data_63, aes(Pollen_status, THA, group=Subject, colour
 
 # White Matter
 summary_WM <- summarySEwithin(data=Data_63, measurevar = "WM", betweenvars="Group", 
-                              withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 WM_plot <- ggplot(data = Data_63, aes(Pollen_status, WM, group=Subject, colour = factor(Group), 
-                                      ymin = 0, ymax = 7)) +
+                                       ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_WM, aes(Pollen_status, WM, group=Group), size = 1.2) +
@@ -431,11 +431,11 @@ WM_plot <- ggplot(data = Data_63, aes(Pollen_status, WM, group=Subject, colour =
 
 # Cerebellum
 summary_CER <- summarySEwithin(data=Data_63, measurevar = "X.CER", betweenvars="Group", 
-                               withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
+                              withinvars="Pollen_status", idvar="Subject", na.rm=TRUE)
 
 dodge = position_dodge(width=0.2)
 CER_plot <- ggplot(data = Data_63, aes(Pollen_status, X.CER, group=Subject, colour = factor(Group), 
-                                       ymin = 0, ymax = 7)) +
+                                      ymin = 0, ymax = 7)) +
   geom_jitter(position=dodge, size = 0) +
   geom_line(position=dodge, size=0.6, linetype="dotted") +
   geom_line(data = summary_CER, aes(Pollen_status, X.CER, group=Group), size = 1.2) +
@@ -451,4 +451,6 @@ multiplot(GM_plot, LFC_plot, MFC_plot, OFC_plot, ACC_plot, INS_plot, LTC_plot, M
           SMC_plot, TP_plot, LPC_plot, PCC_plot, MIOC_plot, LOC_plot, HIP_plot, PHIP_plot, 
           MCC_plot, MPC_plot, AMG_plot, CAU_plot, PUT_plot, PAL_plot, THA_plot, 
           WM_plot, CER_plot, cols = 5)
+
+
 

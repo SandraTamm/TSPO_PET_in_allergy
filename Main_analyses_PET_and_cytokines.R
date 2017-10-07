@@ -615,7 +615,7 @@ GM_plot <- ggplot(data = Data_93, aes(Pollen_status, GM, group=Subject, colour =
   geom_line(data = summary_season, aes(Pollen_status, GM, group=Group), size = 1.2) +
   scale_color_manual(name = "Group", values=c("#D55E00", "#0072B2"), 
                      breaks=c("All", "Ctrl-all"),
-                     labels=c("Allergy", "Control")) +
+                     labels=c("Allergy", "Healthy subjects")) +
   theme(legend.justification=c(0,1), legend.position=c(0,1)) +
   xlab("Pollen season") +
   ylab("Grey matter (VT)") 
