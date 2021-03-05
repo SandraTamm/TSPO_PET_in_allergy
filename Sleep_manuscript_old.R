@@ -225,36 +225,24 @@ plot_grid(TST_Zeo_Diary,
 
 
 # Count no of observations
-data_sleep_measures <- subset(data_sleep_measures, Group != "Kontroll, exkluded")
 
 # No of available nights with self-reported sleep time
 length(data_sleep_measures$Total_sleep_diary) - sum(is.na(data_sleep_measures$Total_sleep_diary))
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Total_sleep_diary)), 
               Group == "Allergy")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Total_sleep_diary)), 
-              Group == "Allergy")$Subject)
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Total_sleep_diary)), 
-              Group == "RA")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Total_sleep_diary)), 
               Group == "RA")$Subject)
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Total_sleep_diary)), 
               Group == "Control")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Total_sleep_diary)), 
-              Group == "Control")$Subject)
+
 
 # No of available nights with MyZeo sleep time
 length(data_sleep_measures$TST_Zeo) - sum(is.na(data_sleep_measures$TST_Zeo))
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)), 
               Group == "Allergy")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)), 
-              Group == "Allergy")$Subject)
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)), 
               Group == "RA")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)), 
-              Group == "RA")$Subject)
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)), 
-              Group == "Control")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)), 
               Group == "Control")$Subject)
 
 
@@ -262,15 +250,9 @@ length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$TST_Zeo)),
 length(data_sleep_measures$Sleep.Time_actigraphs) - sum(is.na(data_sleep_measures$Sleep.Time_actigraphs))
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Sleep.Time_actigraphs)), 
               Group == "Allergy")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Sleep.Time_actigraphs)), 
-              Group == "Allergy")$Subject)
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Sleep.Time_actigraphs)), 
               Group == "RA")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Sleep.Time_actigraphs)), 
-              Group == "RA")$Subject)
 unique(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Sleep.Time_actigraphs)), 
-              Group == "Control")$Subject)
-length(subset(subset(data_sleep_measures, !is.na(data_sleep_measures$Sleep.Time_actigraphs)), 
               Group == "Control")$Subject)
 
 
@@ -609,7 +591,7 @@ RA_TST_perc <- ggplot(subset(RA_Zeo, !is.na(RA_Zeo$Total_Sleep_perc_Zeo)), aes(x
   ylim(60, 100)+
   scale_color_manual(values = c("#E64B35FF", "#bcbddc"))+
   scale_fill_manual(values = c("#E64B35FF", "#bcbddc"))+
-  ylab("TST/TIB (%)")+
+  ylab("TST/TIB (T%)")+
   theme_minimal(base_size = 15)+
   theme(legend.position="top")
 
@@ -679,7 +661,7 @@ All_TST_perc <- ggplot(subset(Allergy_Zeo, !is.na(Allergy_Zeo$Total_Sleep_perc_Z
   theme_minimal(base_size = 15)+
   theme(legend.position="top") +
   xlab("Pollen season") +
-  ylab("TST/TIB (%)")
+  ylab("TST/TIB (T%)")
 
 
 plot_grid(All_DeepSleep_abs+ theme(legend.position="top"),
@@ -782,12 +764,6 @@ plot_grid(RA_morning_sleepiness+ theme(legend.position="top"),
 Sickness_Q <- read_excel("~/Desktop/RAALLPET/Sickness_Q.xlsx")
 Sickness_Q <- Sickness_Q[ ,c(1:4, 15)]
 Sickness_Q$Sickness_Q <- as.numeric(Sickness_Q$Sickness_Q)
-
-
-# Count number of observations
-length(subset(Sickness_Q, Group == "A")$Subject)
-length(subset(Sickness_Q, Group == "RA")$Subject)
-
 
 # Change date variable to POSIXct format
 Sickness_Q$Date_Sickness <- as.Date(paste("20", substr(as.character(Sickness_Q$Date_Sickness), 1,2), "-", 
@@ -897,9 +873,7 @@ Cytokines_allergy <- data_cytokines
 load("~/Desktop/RAALLPET/RA_cytokines.RData")
 Cytokines_RA <- data_cytokines
 
-# Count observations
-length(subset(Cytokines_allergy, Group == "All")$Group)
-length(subset(Cytokines_RA, Group == "RA")$Group)
+
 
 Cytokines_allergy <- subset(Cytokines_allergy, select = c("Sample.ID", "Group", "Season", "TNF_concentration", 
                                                    "TNF_log_concentration", "IL6_concentration",
@@ -998,12 +972,6 @@ plot_grid(TST_Cytokine_composite_plot+ theme(legend.position="top"),
 # Load PET data
 
 load("Data_GM_all.RData")
-
-#Count no of observations (remove NAs in numbers)
-length(!is.na(subset(Data_GM_all, Group == "Allergy")$GM))
-length(!is.na(subset(Data_GM_all, Group == "RA")$GM))
-length(!is.na(subset(Data_GM_all, Group == "Control")$GM))
-length(is.na(subset(Data_GM_all, Group == "Ctrl-RA")$GM))
 
 PET_sleep <- merge(data_sleep_measures, Data_GM_all, by = c("Subject", "PET.date"))
 PET_sleep$Group <- PET_sleep$Group.y
@@ -1121,15 +1089,11 @@ intervals(lme_SQ_DeepSleep, which = "fixed")
 Rhinitis_symptoms <- read.csv("~/Desktop/RAALLPET/Rhinitis_symptoms_170512.csv", sep = ";")
 names(Rhinitis_symptoms)[1] <- "Subject"
 
-
-
 Rhinitis_symptoms$Rhinitis_symptoms_total <- (Rhinitis_symptoms$Runny_nose + Rhinitis_symptoms$Itching_nose +
                                                 Rhinitis_symptoms$Sneezing + Rhinitis_symptoms$Nasal_congestion + 
                                                 Rhinitis_symptoms$Loss_of_smell + Rhinitis_symptoms$Runny_eyes + 
                                                 Rhinitis_symptoms$Itching_eyes + Rhinitis_symptoms$Eye_redness + 
                                                 Rhinitis_symptoms$Swollen_eyes)
-
-
 
 
 Rhinitis_symptoms$Nose <- (Rhinitis_symptoms$Runny_nose + Rhinitis_symptoms$Itching_nose +
@@ -1148,22 +1112,12 @@ Rhinitis_symptoms$Date <- as.Date(paste("20", substr(as.character(Rhinitis_sympt
                                           sep = ""))
 
 
-Sleep_rhinitis <- merge(Rhinitis_symptoms, data_sleep_measures, by = c("Subject", "Date"), all = T)
+Sleep_rhinitis <- merge(Rhinitis_symptoms, data_sleep_measures, by = c("Subject", "Date"))
 Sleep_rhinitis$Group[Sleep_rhinitis$Group == "Ctrl-all+RA"] <- "Ctrl-all"
 Sleep_rhinitis$Group <- droplevels(Sleep_rhinitis$Group)
 
 # Relevel factors
 Sleep_rhinitis$Pollen_status <- relevel(Sleep_rhinitis$Pollen_status, ref = "OUT")
-
-
-# Count observations
-length(Sleep_rhinitis$Rhinitis_symptoms_total) - sum(is.na(Sleep_rhinitis$Rhinitis_symptoms_total))
-length(subset(subset(Sleep_rhinitis, !is.na(Sleep_rhinitis$Rhinitis_symptoms_total)), 
-              Group == "Allergy")$Subject)
-length(subset(subset(Sleep_rhinitis, !is.na(Sleep_rhinitis$Rhinitis_symptoms_total)), 
-              Group == "Control")$Subject)
-
-
 
 Rhinitis_TST_plot <- ggplot(Sleep_rhinitis, aes(x = Rhinitis_symptoms_total, y = TST_Zeo)) +
   geom_point(aes(colour = factor(Group))) +
@@ -1489,48 +1443,7 @@ intervals(lme_DAS28_SWS, which = "fixed")
 
 
 
-#Analyse HAQ after comments from reviewer
-HAQ_TST_plot <- ggplot(Sleep_DAS28, aes(x = HAQ, y = TST_Zeo)) +
-  geom_point() +
-  xlab("HAQ") +
-  ylab("TST Zeo") +
-  ggtitle("Association between HAQ ratings and TST")+
-  geom_smooth(method='lm',formula=y~x, col = "red")
 
-
-lme_HAQ_TST <- lme(TST_Zeo ~ HAQ, data = Sleep_DAS28,
-                     random = list(~1|Subject), na.action = na.exclude) 
-
-anova(lme_HAQ_TST, type = "marginal")
-intervals(lme_HAQ_TST, which = "fixed")
-
-HAQ_SQ_plot <- ggplot(Sleep_DAS28, aes(x = HAQ, y = SleepQuality)) +
-  geom_point() +
-  xlab("HAQ") +
-  ylab("Sleep quality") +
-  ggtitle("Association between HAQ ratings and rated sleep quality")+
-  geom_smooth(method='lm',formula=y~x, col = "red")
-
-
-lme_HAQ_SQ <- lme(SleepQuality ~ HAQ, data = Sleep_DAS28,
-                    random = list(~1|Subject), na.action = na.exclude) 
-
-anova(lme_HAQ_SQ, type = "marginal")
-intervals(lme_HAQ_SQ, which = "fixed")
-
-HAQ_SWS_plot <- ggplot(Sleep_DAS28, aes(x = HAQ, y = Deep_Sleep_abs_num)) +
-  geom_point() +
-  xlab("HAQ") +
-  ylab("SWS Zeo") +
-  ggtitle("Association between HAQ ratings and TST")+
-  geom_smooth(method='lm',formula=y~x, col = "red")
-
-
-lme_HAQ_SWS <- lme(Deep_Sleep_abs_num ~ HAQ, data = Sleep_DAS28,
-                     random = list(~1|Subject), na.action = na.exclude) 
-
-anova(lme_HAQ_SWS, type = "marginal")
-intervals(lme_HAQ_SWS, which = "fixed")
 
 
 
